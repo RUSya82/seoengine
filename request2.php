@@ -8,6 +8,16 @@ $counter = $obj['counter'];
 $res = [];
 $text_result = "# !!!\n\n";
 
+class OneHeaderTwo
+{
+    public $name;
+    public $text;
+    public function __construct($name, $text){
+        $this->name = $name;
+        $this->text = trim(strip_tags($text));
+    }
+}
+
 function getContents($url){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
