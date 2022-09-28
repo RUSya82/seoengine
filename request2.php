@@ -35,6 +35,7 @@ function getContents($url){
 function getHeaders($url):string{
     $html = getContents($url);
     $matches = [];
+    $data = [];
     $data_text = "## " . parse_url($url, PHP_URL_HOST) . "\n\n";
     preg_match_all("/(<([h1-4]+)[^>]*>)(.*?)(<\/\\2>)/", $html, $matches, PREG_OFFSET_CAPTURE);
 /*    preg_match_all("/<h[1-3]([^>]*>| ?>)[^<]+<\/h[1-3]>/", $html, $matches, PREG_OFFSET_CAPTURE);*/
@@ -44,6 +45,7 @@ function getHeaders($url):string{
         $text = $pqs->text();
         $tag = $res->get(0)->tagName;
         if (strlen($text) !== 0) {
+            $data[] = new OneHeaderTwo($tag, $text);
             switch ($tag){
                 case 'h1':
                 case 'h2':
