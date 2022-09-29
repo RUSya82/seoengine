@@ -48,6 +48,9 @@ export default {
   mounted() {
     console.log('mounted')
   },
+  beforeUnmount() {
+    console.log('beforeUnmount');
+  },
   methods: {
     focusText() {
       this.$refs.textInput.select();
@@ -78,17 +81,20 @@ export default {
       body = body.filter(item => item.length > 0);
       let request = {};
       request['arr'] = body;
-      this.$router.push('result');
+      // this.$router.push('result');
       this.postData('request2' +
           '.php', request)
           .then(data => {
             if (data['text']) {
               this.textData = data['text'];
             }
+            if(data['data_json']){
+              console.log(data['data_json']);
+            }
 
           })
           .then(data => {
-            this.$router.push('result');
+            // this.$router.push('result');
           });
     },
   }
