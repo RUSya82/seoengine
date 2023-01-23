@@ -34,34 +34,27 @@ function getContents($url){
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_FAILONERROR, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    $output = curl_exec($ch);
-    if (curl_errno($ch)) {
-        return false;
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    if( ! $output = curl_exec($ch))
+    {
+        trigger_error(curl_error($ch));
     }
-//    if( ! $output = curl_exec($ch))
-//    {
-////        trigger_error(curl_error($ch));
-//        $output = "<h1>" . curl_error($ch) . "</h1>";
-//    }
+//    $output = curl_exec($ch);
     curl_close($ch);
     return $output;
 }
-function convertEncoding($str) {
-    return iconv(mb_detect_encoding($str), "UTF-8", $str);
-}
 
-function getHeaders($url){
+
+function getHeaders($url):array{
     $html = getContents($url);
     $matches = [];
     $data = [];
     $result = [];
-    if ($html !== false){
+    if ($html){
         $data_text = "## " . parse_url($url, PHP_URL_HOST) . "\n\n";
         preg_match_all("/(<([h1-4]+)[^>]*>)(.*?)(<\/\\2>)/", $html, $matches, PREG_OFFSET_CAPTURE);
         /*    preg_match_all("/<h[1-3]([^>]*>| ?>)[^<]+<\/h[1-3]>/", $html, $matches, PREG_OFFSET_CAPTURE);*/
@@ -69,7 +62,6 @@ function getHeaders($url){
             $pqs = phpQuery::newDocument($item[0]);
             $res = $pqs->find('h1,h2,h3,h4');
             $text = $pqs->text();
-            $text = convertEncoding($text);
             $tag = $res->get(0)->tagName;
             if (strlen($text) !== 0) {
                 $data[] = new OneHeaderTwo($tag, $text);
@@ -87,24 +79,27 @@ function getHeaders($url){
                 }
             }
         }
-        $data_text = convertEncoding($data_text);
         $result['text'] = $data_text;
         $result['data'] = $data;
     } else {
-        $result['text'] = false;
-        $result['data'] = false;
+        $result['text'] = $html;
+        $result['data'] = $html;
     }
 
     return $result;
 }
-
+//foreach ($urls as $item){
+//    $itemHeaders = getHeaders($item);
+//    $res[parse_url($item, PHP_URL_HOST)][] = $itemHeaders;
+//}
 foreach ($urls as $item){
     $res_data = getHeaders($item);
-    $text_result .= $res_data['text'];
-    $itemHeaders = $res_data['data'];
-    $res['data_json'][parse_url($item, PHP_URL_HOST)][] = $itemHeaders;
+    if($res_data){
+        $text_result .= $res_data['text'];
+        $itemHeaders = $res_data['data'];
+        $res['data_json'][parse_url($item, PHP_URL_HOST)][] = $itemHeaders;
+    }
+
 }
 $res['text'] = $text_result;
-
-
 echo json_encode($res);

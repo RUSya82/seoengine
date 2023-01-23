@@ -69,7 +69,12 @@ export default {
         if (!response.ok) {
           throw new Error('No data')
         }
-        return response.json();
+        // console.log(response.headers.get('Content-Type'));
+        // const contentType = response.headers.get("content-type");
+        // if (contentType && contentType.indexOf("application/json") !== -1){
+          return response.json();
+        // }
+        // return response.text();
       })
           .catch(error => {
             console.warn(error)
@@ -85,10 +90,11 @@ export default {
       this.postData('request2' +
           '.php', request)
           .then(data => {
-            if (data['text']) {
+            console.log(data)
+            if ((typeof data === "object") && ('text' in data)) {
               this.textData = data['text'];
             }
-            if(data['data_json']){
+            if((typeof data === "object") && ('data_json' in data)){
               console.log(data['data_json']);
             }
 
