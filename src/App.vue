@@ -1,6 +1,8 @@
 <template>
   <nav-bar-component/>
-  <router-view/>
+  <keep-alive include="HomeView">
+    <router-view/>
+  </keep-alive>
 </template>
 
 <style lang="scss">
